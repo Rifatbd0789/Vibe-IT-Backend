@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.pkfg2gw.mongodb.net/?retryWrites=true&w=majority`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -24,6 +24,41 @@ async function run() {
     // await client.connect();
     const database = client.db("Vibe-IT-DB");
     const userCollection = database.collection("users");
+    // load all user info to ui
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+    // check for HR, admin and employee
+    app.get("/users/hr/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      if (user?.role === "admin") {
+        res.send({ user: "admin" });
+      }
+      if (user?.role === "HR") {
+        res.send({ user: "hr" });
+      }
+      if (user?.role === "Employee") {
+        res.send({ user: "employee" });
+      }
+    });
+    // verify the employee
+    app.put("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const user = await userCollection.findOne(filter);
+      const newValue = !user?.Verified;
+      const updateDoc = {
+        $set: {
+          Verified: newValue,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    // post all the users info to database
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
