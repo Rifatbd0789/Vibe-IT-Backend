@@ -26,6 +26,7 @@ async function run() {
     const database = client.db("Vibe-IT-DB");
     const userCollection = database.collection("users");
     const paymentCollection = database.collection("payments");
+    const chartCollection = database.collection("charts");
     // load all user info to ui
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
@@ -82,6 +83,23 @@ async function run() {
       const payment = req.body;
       const paymentResult = await paymentCollection.insertOne(payment);
       res.send(paymentResult);
+    });
+    // data to show on chart
+    app.get("/dashboard/details/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const option = {
+        projection: { _id: 0, time: 1, salary: 1 },
+      };
+      const result = await paymentCollection.find(query, option).toArray();
+      res.send(result);
+    });
+    // load specific user
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const result = await userCollection.findOne(filter);
+      res.send(result);
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
