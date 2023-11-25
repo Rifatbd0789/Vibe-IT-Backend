@@ -101,6 +101,15 @@ async function run() {
       const result = await userCollection.findOne(filter);
       res.send(result);
     });
+    app.get("/payments/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const options = {
+        sort: { time: 1 },
+      };
+      const result = await paymentCollection.find(query, options).toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
