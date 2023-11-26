@@ -29,7 +29,9 @@ async function run() {
     const worksCollection = database.collection("works");
     // load all user info to ui for admin
     app.get("/users", async (req, res) => {
-      const result = await userCollection.find().toArray();
+      const roleToMatch = ["Employee", "HR"];
+      const filter = { role: { $in: roleToMatch }, Verified: true };
+      const result = await userCollection.find(filter).toArray();
       res.send(result);
     });
     // load all employee for hr
