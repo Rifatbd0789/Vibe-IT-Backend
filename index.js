@@ -26,10 +26,16 @@ async function run() {
     const database = client.db("Vibe-IT-DB");
     const userCollection = database.collection("users");
     const paymentCollection = database.collection("payments");
-    const chartCollection = database.collection("charts");
-    // load all user info to ui
+    const worksCollection = database.collection("works");
+    // load all user info to ui for admin
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+    // load all employee for hr
+    app.get("/employee", async (req, res) => {
+      const filter = { role: "Employee" };
+      const result = await userCollection.find(filter).toArray();
       res.send(result);
     });
     // check for HR, admin and employee
@@ -37,7 +43,7 @@ async function run() {
       const email = req.params.email;
       const query = { email: email };
       const user = await userCollection.findOne(query);
-      if (user?.role === "admin") {
+      if (user?.role === "Admin") {
         res.send({ user: "admin" });
       }
       if (user?.role === "HR") {
@@ -101,6 +107,7 @@ async function run() {
       const result = await userCollection.findOne(filter);
       res.send(result);
     });
+    // show payments data to web
     app.get("/payments/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
@@ -108,6 +115,44 @@ async function run() {
         sort: { time: 1 },
       };
       const result = await paymentCollection.find(query, options).toArray();
+      res.send(result);
+    });
+    // post or store the worksheet data to database
+    app.post("/worksheet", async (req, res) => {
+      const sheet = req.body;
+      const result = await worksCollection.insertOne(sheet);
+      res.send(result);
+    });
+    // show data to the web for employee
+    app.get("/worksheet/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const options = {
+        sort: { timeStamp: -1 },
+      };
+      const result = await worksCollection.find(query, options).toArray();
+      res.send(result);
+    });
+    // show all workData for HR
+    app.get("/progress/p", async (req, res) => {
+      const name = req.query.name;
+      let query = {};
+      if (name === "search") {
+        const result = await worksCollection.find().toArray();
+        res.send(result);
+        return;
+      }
+      query = { name: name };
+      const result = await worksCollection.find(query).toArray();
+      res.send(result);
+    });
+    // to get the name of every employee
+    app.get("/progress/name", async (req, res) => {
+      const filter = { role: "Employee" };
+      const option = {
+        projection: { _id: 0, name: 1 },
+      };
+      const result = await userCollection.find(filter, option).toArray();
       res.send(result);
     });
     // Send a ping to confirm a successful connection
