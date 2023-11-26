@@ -34,6 +34,18 @@ async function run() {
       const result = await userCollection.find(filter).toArray();
       res.send(result);
     });
+    // make employee to HR
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const updateDoc = {
+        $set: {
+          role: "HR",
+        },
+      };
+      const result = await userCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
     // load all employee for hr
     app.get("/employee", async (req, res) => {
       const filter = { role: "Employee" };
