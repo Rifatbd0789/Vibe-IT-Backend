@@ -9,55 +9,56 @@ app.use(cors());
 app.use(express.json());
 
 const mongoose = require("mongoose");
+const { model, Schema } = require("mongoose");
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.pkfg2gw.mongodb.net/?retryWrites=true&w=majority`;
 // Create a Mongoose client
 mongoose.connect(uri, {
-  dbName: "Vibe-IT-DB",
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  dbName: process.env.DB_NAME,
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true,
 });
 
-const UserSchema = new mongoose.Schema({
-  email: String,
-  name: String,
-  role: String,
-  designation: String,
-  salary: String,
-  bank: String,
-  photo: String,
-  Verified: Boolean,
-  fire: Boolean,
+const UserSchema = new Schema({
+  email: { type: String },
+  name: { type: String },
+  role: { type: String },
+  designation: { type: String },
+  salary: { type: String },
+  bank: { type: String },
+  photo: { type: String },
+  Verified: { type: String },
+  fire: { type: String },
 });
-const PaymentSchema = new mongoose.Schema({
-  name: String,
-  photo: String,
-  designation: String,
-  email: String,
-  salary: String,
-  transectionId: String,
-  time: String,
-  status: String,
+const PaymentSchema = new Schema({
+  name: { type: String },
+  photo: { type: String },
+  designation: { type: String },
+  email: { type: String },
+  salary: { type: String },
+  transectionId: { type: String },
+  time: { type: String },
+  status: { type: String },
 });
-const WorkSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  date: String,
-  hour: String,
-  task: String,
-  timeStamp: String,
+const WorkSchema = new Schema({
+  name: { type: String },
+  email: { type: String },
+  date: { type: String },
+  hour: { type: String },
+  task: { type: String },
+  timeStamp: { type: String },
 });
-const ServiceSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  image: String,
+const ServiceSchema = new Schema({
+  title: { type: String },
+  description: { type: String },
+  image: { type: String },
 });
 async function run() {
   try {
-    const userCollection = mongoose.model("users", UserSchema);
-    const paymentCollection = mongoose.model("payments", PaymentSchema);
-    const worksCollection = mongoose.model("works", WorkSchema);
-    const serviceCollection = mongoose.model("services", ServiceSchema);
+    const userCollection = model("users", UserSchema);
+    const paymentCollection = model("payments", PaymentSchema);
+    const worksCollection = model("works", WorkSchema);
+    const serviceCollection = model("services", ServiceSchema);
 
     // load services for homepage
     app.get("/services", async (req, res) => {
