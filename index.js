@@ -27,8 +27,8 @@ const UserSchema = new Schema({
   salary: { type: String },
   bank: { type: String },
   photo: { type: String },
-  Verified: { type: String },
-  fire: { type: String },
+  Verified: { type: Boolean },
+  fire: { type: Boolean },
 });
 const PaymentSchema = new Schema({
   name: { type: String },
@@ -128,7 +128,9 @@ async function run() {
           Verified: newValue,
         },
       };
-      const result = await userCollection.updateOne(filter, updateDoc);
+      const result = await userCollection.findOneAndUpdate(filter, updateDoc, {
+        new: true,
+      });
       res.send(result);
     });
     // post all the users info to database
@@ -239,7 +241,19 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
+const globalErrorHandler = (err, _req, res, _next) => {
+  // format error
+  res.status(err.status || 500).json({
+    message: err.message,
+    errors: err.errors,
+  });
+};
+app.all("*", (req, res, next) => {
+  const error = new Error(`Can't find ${req.originalUrl} on the server`);
+  error.status = 404;
+  next(error);
+});
+app.use(globalErrorHandler);
 app.get("/", (req, res) => {
   res.send("Vibe-It server is running");
 });
